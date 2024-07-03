@@ -24,7 +24,6 @@ public class PersonController {
 
     private static final Logger log = LoggerFactory.getLogger(PersonController.class);
 
-
     @Autowired
     private PersonService personService;
 
@@ -33,7 +32,7 @@ public class PersonController {
 
     @GetMapping()
     public ResponseEntity<?> getPersons(){
-        List<Person> persons = personRepository.findAll();
+        List<Person> persons = personService.findAll();
         if (!persons.isEmpty()){
             return ResponseEntity.ok(persons);
         }
@@ -45,19 +44,19 @@ public class PersonController {
             @PathVariable Integer personId) {
 
         if (personId != null){
-            Optional<Person> person = personRepository.findById(personId);
-            return person.map(value -> ResponseEntity.ok(new ApiResponse<>(value, "Find Person success"))).orElseGet(() -> new ResponseEntity<>(new ApiResponse<>(null, "This id doesn't exist."), HttpStatus.UNAUTHORIZED));
-
+            Person person = personService.findById(personId);
+            if(person != null)
+                return ResponseEntity.ok(new ApiResponse<>(person, "Find Person success"));
+            return new ResponseEntity<>(new ApiResponse<>(null, "Person with this id doesn't exists."), HttpStatus.UNAUTHORIZED);
         }
-
         return new ResponseEntity<>(new ApiResponse<>(null, "Find Person failed."), HttpStatus.UNAUTHORIZED);
 
     }
 
     @PostMapping("")
     public ResponseEntity<ApiResponse<Person>> post(@RequestParam String account,@RequestParam String name) {
-        Optional<Person> existingPerson = personRepository.findByAccount(account);
-        if (existingPerson.isPresent()) {
+        Person existingPerson = personService.findByAccount(account);
+        if (existingPerson != null) {
             return new ResponseEntity<>(new ApiResponse<>(null, "This account is already been used."), HttpStatus.UNAUTHORIZED);
         }
         Person newPerson = personService.createPerson(account, name);

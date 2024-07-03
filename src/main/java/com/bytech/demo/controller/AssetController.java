@@ -19,7 +19,6 @@ import java.util.Optional;
 @RequestMapping("/asset")
 public class AssetController {
 
-
     @Autowired
     private AssetService assetService;
 
@@ -31,7 +30,7 @@ public class AssetController {
 
     @GetMapping()
     public ResponseEntity<?> getPersons(){
-        List<Asset> assets = assetRepository.findAll();
+        List<Asset> assets = assetService.findAll();
         if (!assets.isEmpty()){
             return ResponseEntity.ok(assets);
         }
@@ -43,7 +42,7 @@ public class AssetController {
             @PathVariable Integer assetId) {
 
         if (assetId != null){
-            Optional<Asset> asset = assetRepository.findById(assetId);
+            Optional<Asset> asset = assetService.findById(assetId);
             return asset.map(value -> ResponseEntity.ok(new ApiResponse<>(value, "Find Asset success"))).orElseGet(() -> new ResponseEntity<>(new ApiResponse<>(null, "Asset with this id doesn't exist."), HttpStatus.UNAUTHORIZED));
 
         }
@@ -56,9 +55,9 @@ public class AssetController {
     public ResponseEntity<?> post(@RequestParam String symbol,
                                                     @RequestParam Integer amount,
                                                     @RequestParam Integer personId) {
-        Optional<Asset> existingAsset = assetRepository.findBySymbolAndPerson_id(symbol,personId);
-        if (existingAsset.isPresent()) {
-            Asset asset = assetService.updateAmount(existingAsset.get(),amount);
+        Asset existingAsset = assetRepository.findBySymbolAndPerson_id(symbol,personId).orElse(null);
+        if (existingAsset != null) {
+            Asset asset = assetService.updateAmount(existingAsset,amount);
             return new ResponseEntity<>(new ApiResponse<>(asset, "Add amount to existing asset."), HttpStatus.UNAUTHORIZED);
         }
         Optional<Person> person = personRepository.findById(personId);
