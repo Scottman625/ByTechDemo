@@ -6,13 +6,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script type="text/javascript">
         var stompClient = null;
+        var user_id = '2';
 
         function connect() {
             var socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/assets_user_1', function(messageOutput) {
+                stompClient.subscribe('/topic/assets_user_' + user_id, function(messageOutput) {
                     showMessage(messageOutput.body);
                 });
             });

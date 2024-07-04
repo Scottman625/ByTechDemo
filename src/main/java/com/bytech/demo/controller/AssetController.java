@@ -58,7 +58,7 @@ public class AssetController {
         Asset existingAsset = assetRepository.findBySymbolAndPerson_id(symbol,personId).orElse(null);
         if (existingAsset != null) {
             Asset asset = assetService.updateAmount(existingAsset,amount);
-            return new ResponseEntity<>(new ApiResponse<>(asset, "Add amount to existing asset."), HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.ok(new ApiResponse<>(asset, "Add amount to existing asset."));
         }
         Optional<Person> person = personRepository.findById(personId);
         if (person.isPresent()){
